@@ -26,24 +26,33 @@ public void OnPluginStart()
 
 public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
-	int userid, client;
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	StripAllWeapons(client);
+	RequestFrame(SetWeapons, client);
+}
+
+public void SetWeapons(int client) 
+{ 
+if(IsValidClient(client) && IsPlayerAlive(client)) 
+{ 
 	char sCookieValue[12];
-	userid = event.GetInt("userid");
-	client = GetClientOfUserId(userid);
 	GetClientCookie(client, g_hScoutCookie, sCookieValue, sizeof(sCookieValue));
 	int cookieValue = StringToInt(sCookieValue);
 	if (cookieValue == 1)
 	{
-		if (GetPlayerWeaponSlot(client, 0) != -1)
-			GivePlayerItem(client, "weapon_ssg08");
+		GivePlayerItem(client, "weapon_ssg08");
 	}
 	else
 	{
-		if (GetPlayerWeaponSlot(client, 0) != -1)
-			GivePlayerItem(client, "weapon_awp");
+		GivePlayerItem(client, "weapon_awp");
 	}
-	return Plugin_Continue;
+	if (GetClientTeam(client) == 2)
+		GivePlayerItem(client, "weapon_knife_t");
+	else
+		GivePlayerItem(client, "weapon_knife");
 }
+return;
+} 
 
 public Action CmdScout(int client, int args)
 {
@@ -66,4 +75,49 @@ public Action CmdScout(int client, int args)
 		SetClientCookie(client, g_hScoutCookie, sCookieValue);
 	}
 	return Plugin_Handled;
+}
+
+stock void StripAllWeapons(int client) 
+{
+	if (!IsValidClient(client, false))
+		return;
+
+	int weapon;
+	for (int i; i < 4; i++) {
+
+		if ((weapon = GetPlayerWeaponSlot(client, i)) != -1) {
+
+			if (IsValidEntity(weapon)) {
+
+				RemovePlayerItem(client, weapon);
+				AcceptEntityInput(weapon, "Kill");
+
+			}
+
+		}
+
+	}
+
+}
+
+stock bool IsValidClient(int client, bool noBots=true) 
+{
+	if (client < 1 || client > MaxClients)
+		return false;
+
+	if (!IsClientInGame(client))
+		return false;
+
+	if (!IsClientConnected(client))
+		return false;
+
+	if (noBots)
+		if (IsFakeClient(client))
+			return false;
+
+	if (IsClientSourceTV(client))
+		return false;
+
+	return true;
+
 }
