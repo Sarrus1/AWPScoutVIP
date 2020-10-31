@@ -7,6 +7,7 @@
 
 
 Handle g_hScoutCookie;
+int g_iHealth, g_Armor;
 
 public Plugin myinfo =
 {
@@ -22,6 +23,20 @@ public void OnPluginStart()
 	RegAdminCmd("sm_scout", CmdScout, ADMFLAG_CUSTOM6, "Switches between AWP and scout");
 	g_hScoutCookie = RegClientCookie("ScoutCookie", "Cookie that defines wether or not you'll receive a scout instead of an AWP", CookieAccess_Protected);
 	HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
+	HookEvent("player_hurt", OnPlayerHurt, EventHookMode_Pre);
+
+	
+	g_iHealth = FindSendPropInfo("CCSPlayer", "m_iHealth");
+	if (g_iHealth == -1)
+	{
+		SetFailState("[Headshot Only] Error - Unable to get offset for CSSPlayer::m_iHealth");
+	}
+
+	g_Armor = FindSendPropInfo("CCSPlayer", "m_ArmorValue");
+	if (g_Armor == -1)
+	{
+		SetFailState("[Headshot Only] Error - Unable to get offset for CSSPlayer::m_ArmorValue");
+	}
 }
 
 public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -41,6 +56,7 @@ if(IsValidClient(client) && IsPlayerAlive(client))
 	if (cookieValue == 1)
 	{
 		GivePlayerItem(client, "weapon_ssg08");
+		PrintCenterText(client, "HS ONLY ON");
 	}
 	else
 	{
@@ -65,6 +81,7 @@ public Action CmdScout(int client, int args)
 		{
 			cookieValue = 1;
 			PrintToChat(client, "You are now using the Scout.");
+			PrintCenterText(client, "HS ONLY ON");
 		}
 		else
 		{
@@ -91,13 +108,9 @@ stock void StripAllWeapons(int client)
 
 				RemovePlayerItem(client, weapon);
 				AcceptEntityInput(weapon, "Kill");
-
 			}
-
 		}
-
 	}
-
 }
 
 stock bool IsValidClient(int client, bool noBots=true) 
@@ -120,4 +133,37 @@ stock bool IsValidClient(int client, bool noBots=true)
 
 	return true;
 
+}
+
+
+public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
+{
+	int hitgroup = GetEventInt(event, "hitgroup");
+	int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	int dhealth = GetEventInt(event, "dmg_health");
+	int darmor = GetEventInt(event, "dmg_armor");
+	int health = GetEventInt(event, "health");
+	int armor = GetEventInt(event, "armor");
+	char weapon[128];
+	GetEventString(event, "weapon", weapon, sizeof(weapon));
+	if (StrEqual(weapon, "ssg08", false))
+	{
+		if (hitgroup == 1)
+		{
+			return Plugin_Continue;
+		}
+		else if (attacker != victim && victim != 0 && attacker != 0)
+		{
+			if (dhealth > 0)
+			{
+				SetEntData(victim, g_iHealth, (health + dhealth), 4, true);
+			}
+			if (darmor > 0)
+			{
+				SetEntData(victim, g_Armor, (armor + darmor), 4, true);
+			}
+		}
+	}
+	return Plugin_Continue;
 }
