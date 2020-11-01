@@ -155,6 +155,7 @@ public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 		}
 		else if (attacker != victim && victim != 0 && attacker != 0)
 		{
+			PrintToChat(attacker, "You can only headshot somebody with the scout!");
 			if (dhealth > 0)
 			{
 				SetEntData(victim, g_iHealth, (health + dhealth), 4, true);
