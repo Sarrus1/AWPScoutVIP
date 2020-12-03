@@ -53,7 +53,7 @@ if(IsValidClient(client) && IsPlayerAlive(client))
 	char sCookieValue[12];
 	GetClientCookie(client, g_hScoutCookie, sCookieValue, sizeof(sCookieValue));
 	int cookieValue = StringToInt(sCookieValue);
-	if (cookieValue == 1)
+	if ((cookieValue == 1) && (CheckCommandAccess(client, "sm_scout", ADMFLAG_CUSTOM6)))
 	{
 		GivePlayerItem(client, "weapon_ssg08");
 		PrintCenterText(client, "HS ONLY ON");
