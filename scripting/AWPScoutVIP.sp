@@ -139,32 +139,15 @@ stock bool IsValidClient(int client, bool noBots=true)
 public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	int hitgroup = GetEventInt(event, "hitgroup");
-	int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	int dhealth = GetEventInt(event, "dmg_health");
-	int darmor = GetEventInt(event, "dmg_armor");
-	int health = GetEventInt(event, "health");
-	int armor = GetEventInt(event, "armor");
 	char weapon[128];
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
 	if (StrEqual(weapon, "ssg08", false))
 	{
-		if (hitgroup == 1)
-		{
+		if(hitgroup == 1)
 			return Plugin_Continue;
-		}
-		else if (attacker != victim && victim != 0 && attacker != 0)
-		{
-			PrintToChat(attacker, "You can only headshot somebody with the scout!");
-			if (dhealth > 0)
-			{
-				SetEntData(victim, g_iHealth, (health + dhealth), 4, true);
-			}
-			if (darmor > 0)
-			{
-				SetEntData(victim, g_Armor, (armor + darmor), 4, true);
-			}
-		}
+		else
+			return Plugin_Handled;
 	}
-	return Plugin_Continue;
+	else
+		return Plugin_Continue;
 }
