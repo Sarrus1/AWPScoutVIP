@@ -2,12 +2,12 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <clientprefs>
+#include <cstrike>
 #pragma newdecls required
 #pragma semicolon 1
 
 
 Handle g_hScoutCookie;
-int g_iHealth, g_Armor;
 
 public Plugin myinfo =
 {
@@ -23,21 +23,19 @@ public void OnPluginStart()
 	RegAdminCmd("sm_scout", CmdScout, ADMFLAG_CUSTOM6, "Switches between AWP and scout");
 	g_hScoutCookie = RegClientCookie("ScoutCookie", "Cookie that defines wether or not you'll receive a scout instead of an AWP", CookieAccess_Protected);
 	HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
-	HookEvent("player_hurt", OnPlayerHurt, EventHookMode_Pre);
-
-	
-	g_iHealth = FindSendPropInfo("CCSPlayer", "m_iHealth");
-	if (g_iHealth == -1)
+	for(int client = 1; client <= MaxClients; client++) 
 	{
-		SetFailState("[Headshot Only] Error - Unable to get offset for CSSPlayer::m_iHealth");
-	}
-
-	g_Armor = FindSendPropInfo("CCSPlayer", "m_ArmorValue");
-	if (g_Armor == -1)
-	{
-		SetFailState("[Headshot Only] Error - Unable to get offset for CSSPlayer::m_ArmorValue");
+		if(client > 0 && client <= MaxClients && IsClientInGame(client)) 
+			SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 	}
 }
+
+
+public void OnClientPutInServer(int client) 
+{
+	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+}
+
 
 public Action OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
@@ -136,18 +134,14 @@ stock bool IsValidClient(int client, bool noBots=true)
 }
 
 
-public Action OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
-{
-	int hitgroup = GetEventInt(event, "hitgroup");
-	char weapon[128];
-	GetEventString(event, "weapon", weapon, sizeof(weapon));
-	if (StrEqual(weapon, "ssg08", false))
+public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom) {
+	if(IsValidClient(victim)) 
 	{
-		if(hitgroup == 1)
+		char sWeapon[32];
+		GetEdictClassname(inflictor, sWeapon, sizeof(sWeapon));
+		if(StrEqual(sWeapon, "ssg08") && (damagetype & CS_DMG_HEADSHOT))
 			return Plugin_Continue;
-		else
-			return Plugin_Handled;
+		return Plugin_Handled;
 	}
-	else
-		return Plugin_Continue;
+	return Plugin_Continue;
 }
