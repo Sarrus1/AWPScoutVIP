@@ -144,6 +144,8 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		{
 			if (damagetype & CS_DMG_HEADSHOT)
 				return Plugin_Continue;
+			SetEntPropVector(victim, Prop_Send, "m_aimPunchAngle", NULL_VECTOR);
+			SetEntPropVector(victim, Prop_Send, "m_aimPunchAngleVel", NULL_VECTOR); 
 			return Plugin_Handled;
 		}
 	}
