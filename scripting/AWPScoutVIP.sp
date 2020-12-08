@@ -134,14 +134,19 @@ stock bool IsValidClient(int client, bool noBots=true)
 }
 
 
-public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom) {
+public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
 	if(IsValidClient(victim)) 
 	{
 		char sWeapon[32];
-		GetEdictClassname(inflictor, sWeapon, sizeof(sWeapon));
-		if(StrEqual(sWeapon, "ssg08") && (damagetype & CS_DMG_HEADSHOT))
-			return Plugin_Continue;
-		return Plugin_Handled;
+		GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
+		PrintToChatAll(sWeapon);
+		if(StrEqual(sWeapon, "weapon_ssg08", false))
+		{
+			if (damagetype & CS_DMG_HEADSHOT)
+				return Plugin_Continue;
+			return Plugin_Handled;
+		}
 	}
 	return Plugin_Continue;
 }
