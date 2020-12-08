@@ -140,7 +140,6 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	{
 		char sWeapon[32];
 		GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
-		PrintToChatAll(sWeapon);
 		if(StrEqual(sWeapon, "weapon_ssg08", false))
 		{
 			if (damagetype & CS_DMG_HEADSHOT)
