@@ -21,8 +21,14 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_scout", CmdScout, ADMFLAG_CUSTOM6, "Switches between AWP and scout");
+	
 	g_hScoutCookie = RegClientCookie("ScoutCookie", "Cookie that defines wether or not you'll receive a scout instead of an AWP", CookieAccess_Protected);
+	
 	HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
+
+	//AddTempEntHook("EffectDispatch", TE_OnEffectDispatch);
+	//AddTempEntHook("World Decal", TE_OnWorldDecal);
+
 	for(int client = 1; client <= MaxClients; client++) 
 	{
 		if(client > 0 && client <= MaxClients && IsClientInGame(client)) 
@@ -151,3 +157,80 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	}
 	return Plugin_Continue;
 }
+/*
+public Action TE_OnEffectDispatch(const char[] te_name, const Players[], int numClients, float delay)
+{
+	int iEffectIndex = TE_ReadNum("m_iEffectName");
+	int nHitBox = TE_ReadNum("m_nHitBox");
+	char sEffectName[64];
+
+	GetEffectName(iEffectIndex, sEffectName, sizeof(sEffectName));
+	
+	if(StrEqual(sEffectName, "csblood"))
+	{
+		return Plugin_Handled;
+	}
+	if(StrEqual(sEffectName, "ParticleEffect"))
+	{
+		char sParticleEffectName[64];
+		GetParticleEffectName(nHitBox, sParticleEffectName, sizeof(sParticleEffectName));
+		
+		if(StrEqual(sParticleEffectName, "impact_helmet_headshot") || StrEqual(sParticleEffectName, "impact_physics_dust"))
+			return Plugin_Handled;
+	}
+
+	return Plugin_Continue;
+}
+
+public Action TE_OnWorldDecal(const char[] te_name, const Players[], int numClients, float delay)
+{
+	float vecOrigin[3];
+	int nIndex = TE_ReadNum("m_nIndex");
+	char sDecalName[64];
+
+	TE_ReadVector("m_vecOrigin", vecOrigin);
+	GetDecalName(nIndex, sDecalName, sizeof(sDecalName));
+	
+	if(StrContains(sDecalName, "decals/blood") == 0 && StrContains(sDecalName, "_subrect") != -1)
+		return Plugin_Handled;
+
+	return Plugin_Continue;
+}
+
+stock bool IsClientValid(int client)
+{
+	if(client > 0 && client <= MaxClients && IsClientInGame(client))
+		return true;
+	return false;
+}
+
+stock int GetParticleEffectName(int index, char[] sEffectName, int maxlen)
+{
+	int table = INVALID_STRING_TABLE;
+	
+	if (table == INVALID_STRING_TABLE)
+		table = FindStringTable("ParticleEffectNames");
+	
+	return ReadStringTable(table, index, sEffectName, maxlen);
+}
+
+stock int GetEffectName(int index, char[] sEffectName, int maxlen)
+{
+	int table = INVALID_STRING_TABLE;
+	
+	if (table == INVALID_STRING_TABLE)
+		table = FindStringTable("EffectDispatch");
+	
+	return ReadStringTable(table, index, sEffectName, maxlen);
+}
+
+stock int GetDecalName(int index, char[] sDecalName, int maxlen)
+{
+	int table = INVALID_STRING_TABLE;
+	
+	if (table == INVALID_STRING_TABLE)
+		table = FindStringTable("decalprecache");
+	
+	return ReadStringTable(table, index, sDecalName, maxlen);
+}
+*/
